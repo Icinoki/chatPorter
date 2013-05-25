@@ -75,14 +75,6 @@ function event_unload()
 	add_to_chat(55, "Unloading ".._addon.name.." v".._addon.version..".")
 end
 
-function event_login(name)
-	LSname = get_player().linkshell;
-	playerName = get_player().name;
-	add_to_chat(160,"Refreshing data...");
-	add_to_chat(160,"LSname: "..LSname);
-	add_to_chat(160,"playerName: "..playerName);
-end
-
 function event_addon_command(...)
     local args = {...}
     if args[1] ~= nil then
@@ -247,10 +239,9 @@ function event_ipc_message(msg)
 --				add_to_chat(160,"linkshell...");
 				if (senderLSname ~= LSname) then
 					add_to_chat(LScolor,"["..senderLSname.."] <"..senderName.."> "..message);
---				else
-					-- this should fire if both chars have same LS, only here for testing
---					add_to_chat(LScolor,"(linkshelltest)["..senderLSname.."] <"..senderName.."> "..message);
---					add_to_chat(160,"senderLSname: "..senderLSname..", LSname: "..LSname);
+				else
+					-- this should never fire, only here for testing
+					add_to_chat(LScolor,"(linkshelltest)["..senderLSname.."] <"..senderName.."> "..message);
 				end
 		
 			end
@@ -259,15 +250,6 @@ function event_ipc_message(msg)
 end
 
 function event_incoming_text(original, modified, mode)
-	if (playerName == nil) then
-		playerName = get_player().name;
-		add_to_chat(160,"playerName is nil");
-	end
-	if (LSname == nil) then
-		LSname = get_player().linkshell;
-		add_to_chat(160,"LSname is nil");
-	end
-
 	if (mode == 6) then -- linkshell (me)
 --		add_to_chat(14,"(event_incoming_text)this is mode: "..mode);
 --		add_to_chat(160,original);
