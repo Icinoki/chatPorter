@@ -28,10 +28,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 _addon = {}
 _addon.name = 'chatPorter'
-_addon.version = '1.1'
+_addon.version = '1.11'
 _addon.author = 'Ragnarok.Ikonic'
 
 require 'tablehelper'
+require 'stringhelper'
+
+myChars = {"Ikonic", "Vivika", "Icinoki", "Vicassina", "Xynia", "Ayka"};
 
 LSname = get_player().linkshell;
 playerName = get_player().name;
@@ -68,6 +71,11 @@ function event_load()
 	send_command('alias p2 lua command chatPorter p')
 	send_command('alias t2 lua command chatPorter t')
 	send_command('alias r2 lua command chatPorter r')
+	send_command('alias f1 lua command chatPorter f1')
+	send_command('alias f2 lua command chatPorter f2')
+	send_command('alias f3 lua command chatPorter f3')
+	send_command('alias f4 lua command chatPorter f4')
+	send_command('alias f5 lua command chatPorter f5')
 	add_to_chat(55, "Loading ".._addon.name.." v".._addon.version.." (written by ".._addon.author..")")
 	event_addon_command('help');
 --	showStatus();
@@ -81,6 +89,11 @@ function event_unload()
 	send_command('unalias p2')
 	send_command('unalias t2')
 	send_command('unalias r2')
+	send_command('unalias f1')
+	send_command('unalias f2')
+	send_command('unalias f3')
+	send_command('unalias f4')
+	send_command('unalias f5')
 	add_to_chat(55, "Unloading ".._addon.name.." v".._addon.version..".")
 end
 
@@ -115,6 +128,9 @@ function event_addon_command(...)
 --			add_to_chat(160, "r2 message: '"..com2.."'");
 			send_ipc_message(specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
 --			add_to_chat(160,specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
+		elseif string.first(comm:lower(), 1) == 'f' then
+			send_ipc_message(specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
+--			add_to_chat(160,specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
 		end
     elseif args[1] ~= nil then
         comm = args[1]
@@ -132,6 +148,8 @@ function event_addon_command(...)
 			add_to_chat(55,'     //p2 message        : Sends message from second character to party.')
 			add_to_chat(55,'     //t2 name message   : Sends message from second character to name in tell.')
 			add_to_chat(55,'     //r2 message        : Sends reply message from second character.')
+			add_to_chat(55,'     //f# message        : Sends message from second character to FFOChat channel #.  Works for 1-5.')
+			add_to_chat(55,'     //cp f# message     : Same as f#, but for any #.')
 		elseif comm:lower() == 'status' then
             showStatusArray();
         elseif comm:lower() == 'toggle' then
@@ -246,9 +264,9 @@ end
 function event_ipc_message(msg)
 --add_to_chat(160,"..."..msg.."...");
 	if (chatPorterValues.UseChatPorter.Value == true) then
-		if (string.find(msg, "|(%w+):(%a*)|(%a+)|(.+)")) then
+		if (string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")) then
 --			add_to_chat(160,"does this hit?");
-			a,b,chatMode,senderLSname,senderName,message = string.find(msg, "|(%w+):(%a*)|(%a+)|(.+)")
+			a,b,chatMode,senderLSname,senderName,message = string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")
 --[[
 			add_to_chat(41,"chatMode: "..chatMode);
 			add_to_chat(41,"senderLSname: "..senderLSname);
@@ -261,7 +279,9 @@ function event_ipc_message(msg)
 					add_to_chat(Tcolor,"[t] "..senderName..">>"..senderLSname.." "..message);
 				else	
 					-- this should never fire, only here for testing
-					add_to_chat(Tcolor,"(telltesting)[t] "..senderName..">>"..senderLSname.." "..message);
+					if table.contains(myChars, senderName) then
+						add_to_chat(Tcolor,"(telltesting)[t] "..senderName..">>"..senderLSname.." "..message);
+					end
 				end
 		
 			elseif (chatMode == "p") and (chatPorterValues.DisplayPartyChat.Value == true) then
@@ -287,14 +307,11 @@ function event_ipc_message(msg)
 			elseif (chatMode == "p2") then
 				send_command("input /p "..message);
 			elseif (chatMode == "t2") then
-				--add check to make sure original player isn't sending tell
-				--don't really need said check
 				send_command("input /t "..message);
---				add_to_chat(14,"input /t "..message);
 			elseif (chatMode == "r2") then
---				add_to_chat(14, "let's see...'"..lastTellFrom.."' >>> "..message);
 				send_command("input /t "..lastTellFrom.." "..message);
---				add_to_chat(160,"input /t "..lastTellFrom.." "..message);
+			elseif (chatMode == "f") then
+				send_command("input /"..senderLSname.." "..message);
 			end
 		end
 	end

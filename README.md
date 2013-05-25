@@ -1,4 +1,4 @@
-#ChatPorter v1.0  
+#ChatPorter v1.11  
 ####written by Ragnarok.Ikonic  
 
 Displays tell, party, and linkshell chat to alternate character.  
@@ -18,3 +18,4 @@ Currently only tested and supporting two characters.
 * v0.0  5/20/13 Created addon.  
 * v1.0  5/22/13 Testing, variable setup, boolean conversion, added toggles.  
 * v1.1  5/25/13 Added l2/p2/t2/r2 options to chat on 2nd char from 1st.  
+* v1.11 5/25/13 Added support for FFOChat replying.  
