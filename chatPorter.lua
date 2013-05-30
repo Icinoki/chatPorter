@@ -27,14 +27,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]]
 
 _addon = {}
-_addon.name = 'chatPorter'
-_addon.version = '1.11'
+_addon.name = 'ChatPorter'
+_addon.version = '1.12'
 _addon.author = 'Ragnarok.Ikonic'
 
 require 'tablehelper'
 require 'stringhelper'
-
-myChars = {"Ikonic", "Vivika", "Icinoki", "Vicassina", "Xynia", "Ayka"};
+require 'colors'
 
 LSname = get_player().linkshell;
 playerName = get_player().name;
@@ -52,38 +51,37 @@ DisplayTellChat = 1;
 
 chatPorterValues = T{};
 chatPorterValues.UseChatPorter = T{};
-chatPorterValues.UseChatPorter.Name = "UseChatPorter";
-chatPorterValues.UseChatPorter.Value = true;
+chatPorterValues.UseChatPorter.name = "UseChatPorter";
+chatPorterValues.UseChatPorter.value = true;
 chatPorterValues.DisplayPartyChat = T{};
-chatPorterValues.DisplayPartyChat.Name = "DisplayPartyChat";
-chatPorterValues.DisplayPartyChat.Value = true;
+chatPorterValues.DisplayPartyChat.name = "DisplayPartyChat";
+chatPorterValues.DisplayPartyChat.value = true;
 chatPorterValues.DisplayLinkshellChat = T{};
-chatPorterValues.DisplayLinkshellChat.Name = "DisplayLinkshellChat";
-chatPorterValues.DisplayLinkshellChat.Value = true;
+chatPorterValues.DisplayLinkshellChat.name = "DisplayLinkshellChat";
+chatPorterValues.DisplayLinkshellChat.value = true;
 chatPorterValues.DisplayTellChat = T{};
-chatPorterValues.DisplayTellChat.Name = "DisplayTellChat";
-chatPorterValues.DisplayTellChat.Value = true;
+chatPorterValues.DisplayTellChat.name = "DisplayTellChat";
+chatPorterValues.DisplayTellChat.value = true;
 
 function event_load()
-	send_command('alias chatPorter lua command chatPorter')
-	send_command('alias cp lua command chatPorter')
-	send_command('alias l2 lua command chatPorter l')
-	send_command('alias p2 lua command chatPorter p')
-	send_command('alias t2 lua command chatPorter t')
-	send_command('alias r2 lua command chatPorter r')
-	send_command('alias f1 lua command chatPorter f1')
-	send_command('alias f2 lua command chatPorter f2')
-	send_command('alias f3 lua command chatPorter f3')
-	send_command('alias f4 lua command chatPorter f4')
-	send_command('alias f5 lua command chatPorter f5')
+	send_command('alias ChatPorter lua command ChatPorter')
+	send_command('alias cp lua command ChatPorter')
+	send_command('alias l2 lua command ChatPorter l')
+	send_command('alias p2 lua command ChatPorter p')
+	send_command('alias t2 lua command ChatPorter t')
+	send_command('alias r2 lua command ChatPorter r')
+	send_command('alias f1 lua command ChatPorter f1')
+	send_command('alias f2 lua command ChatPorter f2')
+	send_command('alias f3 lua command ChatPorter f3')
+	send_command('alias f4 lua command ChatPorter f4')
+	send_command('alias f5 lua command ChatPorter f5')
 	add_to_chat(55, "Loading ".._addon.name.." v".._addon.version.." (written by ".._addon.author..")")
 	event_addon_command('help');
---	showStatus();
-	showStatusArray();
+	showStatus();
 end
 
 function event_unload()
-	send_command('unalias chatPorter')
+	send_command('unalias ChatPorter')
 	send_command('unalias cp')
 	send_command('unalias l2')
 	send_command('unalias p2')
@@ -100,9 +98,9 @@ end
 function event_login(name)
 	LSname = get_player().linkshell;
 	playerName = get_player().name;
-	add_to_chat(160,"Refreshing data...");
-	add_to_chat(160,"LSname: "..LSname);
-	add_to_chat(160,"playerName: "..playerName);
+--	add_to_chat(160,"Refreshing data...");
+--	add_to_chat(160,"LSname: "..LSname);
+--	add_to_chat(160,"playerName: "..playerName);
 end
 
 function event_addon_command(...)
@@ -111,39 +109,28 @@ function event_addon_command(...)
         comm = args[1]
 		com2 = table.remove(args,1)
 		com2 = table.concat(args, ' ')
---		add_to_chat(160, "second word: "..com2);
 		if comm:lower() == 'l' then
---			add_to_chat(160, "l2 message: '"..com2.."'");
 			send_ipc_message(specialChar.."l2:"..LSname..specialChar..playerName..specialChar..com2);
---			add_to_chat(160,specialChar.."l2:"..LSname..specialChar..playerName..specialChar..com2);
 		elseif comm:lower() == 'p' then
---			add_to_chat(160, "p2 message: '"..com2.."'");
 			send_ipc_message(specialChar.."p2:"..""..specialChar..playerName..specialChar..com2);
---			add_to_chat(160,specialChar.."p2:"..""..specialChar..playerName..specialChar..com2);
 		elseif comm:lower() == 't' then
---			add_to_chat(160, "t2 message: '"..com2.."'");
 			send_ipc_message(specialChar.."t2:"..playerName..specialChar..playerName..specialChar..com2);
---			add_to_chat(160,specialChar.."t2:"..playerName..specialChar..playerName..specialChar..com2);
 		elseif comm:lower() == 'r' then
---			add_to_chat(160, "r2 message: '"..com2.."'");
 			send_ipc_message(specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
---			add_to_chat(160,specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
 		elseif string.first(comm:lower(), 1) == 'f' then
 			send_ipc_message(specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
---			add_to_chat(160,specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
 		end
     elseif args[1] ~= nil then
         comm = args[1]
         if comm:lower() == 'help' then
             add_to_chat(55,_addon.name.." v".._addon.version..' possible commands:')
-			add_to_chat(55,'     //chatPorter and //cp are both valid commands.')
-            add_to_chat(55,'     //chatPorter help   : Lists this menu.')
-			add_to_chat(55,'     //chatPorter status : Shows current configuration.')
-            add_to_chat(55,'     //chatPorter toggle : Toggles chatPorter on/off.')
---            add_to_chat(55,'     //chatPorter off    : Turns off chatPorter.')
-            add_to_chat(55,'     //chatPorter p      : Toggles using chatPorter for party chat.')
-            add_to_chat(55,'     //chatPorter l      : Toggles using chatPorter for linkshell chat.')
-            add_to_chat(55,'     //chatPorter t      : Toggles using chatPorter for tell chat.')
+			add_to_chat(55,'     //ChatPorter and //cp are both valid commands.')
+            add_to_chat(55,'     //ChatPorter help   : Lists this menu.')
+			add_to_chat(55,'     //ChatPorter status : Shows current configuration.')
+            add_to_chat(55,'     //ChatPorter toggle : Toggles ChatPorter on/off.')
+            add_to_chat(55,'     //ChatPorter p      : Toggles using ChatPorter for party chat.')
+            add_to_chat(55,'     //ChatPorter l      : Toggles using ChatPorter for linkshell chat.')
+            add_to_chat(55,'     //ChatPorter t      : Toggles using ChatPorter for tell chat.')
 			add_to_chat(55,'     //l2 message        : Sends message from second character to linkshell.')
 			add_to_chat(55,'     //p2 message        : Sends message from second character to party.')
 			add_to_chat(55,'     //t2 name message   : Sends message from second character to name in tell.')
@@ -151,44 +138,24 @@ function event_addon_command(...)
 			add_to_chat(55,'     //f# message        : Sends message from second character to FFOChat channel #.  Works for 1-5.')
 			add_to_chat(55,'     //cp f# message     : Same as f#, but for any #.')
 		elseif comm:lower() == 'status' then
-            showStatusArray();
+            showStatus();
         elseif comm:lower() == 'toggle' then
-			chatPorterValues.UseChatPorter.Value = not chatPorterValues.UseChatPorter.Value;
-			showStatusArray(chatPorterValues.UseChatPorter);
+			chatPorterValues.UseChatPorter.value = not chatPorterValues.UseChatPorter.value;
+			showStatus(chatPorterValues.UseChatPorter);
         elseif comm:lower() == 'p' then
-			chatPorterValues.DisplayPartyChat.Value = not chatPorterValues.DisplayPartyChat.Value;
-			showStatusArray(chatPorterValues.DisplayPartyChat);
+			chatPorterValues.DisplayPartyChat.value = not chatPorterValues.DisplayPartyChat.value;
+			showStatus(chatPorterValues.DisplayPartyChat);
         elseif comm:lower() == 'l' then
-			chatPorterValues.DisplayLinkshellChat.Value = not chatPorterValues.DisplayLinkshellChat.Value;
-			showStatusArray(chatPorterValues.DisplayLinkshellChat);
+			chatPorterValues.DisplayLinkshellChat.value = not chatPorterValues.DisplayLinkshellChat.value;
+			showStatus(chatPorterValues.DisplayLinkshellChat);
         elseif comm:lower() == 't' then
-			chatPorterValues.DisplayTellChat.Value = not chatPorterValues.DisplayTellChat.Value;
-			showStatusArray(chatPorterValues.DisplayTellChat);
+			chatPorterValues.DisplayTellChat.value = not chatPorterValues.DisplayTellChat.value;
+			showStatus(chatPorterValues.DisplayTellChat);
 		elseif comm:lower() == 'reset' then
 			add_to_chat(160, _addon.name.." v".._addon.version.." resetting stats.");
             reset();
         elseif comm:lower() == 'exit' then
-			send_command('lua u chatPorter')
-        elseif comm:lower() == 'test' then
-			send_command('input /l testing chatPorter on Linkshell')
-        elseif comm:lower() == 'test2' then
-			send_command('input /p testing chatPorter on Party')
-        elseif comm:lower() == 'test3' then
-			send_command('input /t <me> testing chatPort on Tell')
-        elseif comm:lower() == 'test4' then
-
-        elseif comm:lower() == 'test5' then
-			DisplayTellChat = not DisplayTellChat;
-			add_to_chat(160,"DisplayTellChat new value: "..DisplayTellChat);
-			showStatus(DisplayTellChat);
-		elseif comm:lower() == 'test6' then
-			chatPorterValues.UseChatPorter.Value = -chatPorterValues.UseChatPorter.Value;
-			showStatusArray(chatPorterValues.UseChatPorter);
-		elseif comm:lower() == 'test7' then
-			chatPorterValues.UseChatPorter.Value = not chatPorterValues.UseChatPorter.Value;
-			showStatusArray(chatPorterValues.UseChatPorter);
-		elseif comm:lower() == 'test8' then
-			send_command("cp l hey, how are you doing today? i'm doing great!");
+			send_command('lua u ChatPorter')
         else
             return
         end
@@ -201,19 +168,13 @@ function event_linkshell_change(linkshell)
 	LSname = get_player().linkshell;
 end
 
-function showStatusArray(var)
---	add_to_chat(160,"show status array");
+function showStatus(var)
 	if (var ~= nul) then
-		add_to_chat(160,var.Name..": "..onOffPrint(var.Value));
+		add_to_chat(160,var.name..": "..onOffPrint(var.value));
 	else
-		var = chatPorterValues.UseChatPorter;
-		add_to_chat(160,var.Name..": "..onOffPrint(var.Value));
-		var = chatPorterValues.DisplayPartyChat;
-		add_to_chat(160,var.Name..": "..onOffPrint(var.Value));
-		var = chatPorterValues.DisplayLinkshellChat;
-		add_to_chat(160,var.Name..": "..onOffPrint(var.Value));
-		var = chatPorterValues.DisplayTellChat;
-		add_to_chat(160,var.Name..": "..onOffPrint(var.Value));
+		for i,v in pairsByKeys(chatPorterValues) do
+			add_to_chat(160,chatPorterValues[i].name..": "..string.color(onOffPrint(chatPorterValues[i].value), 55, 160));
+		end
 	end
 end
 
@@ -227,80 +188,40 @@ function onOffPrint(bleh)
 	else
 		bleh = "OFF";
 	end
---	add_to_chat(14,bleh);
 	return bleh;
 end
 
-
-
-
-function toggle(varName, displayNew, chatColor)
-	if (displayNew == nul) then
-		displayNew = "n";
-	else
-		displayNew = "y";
-	end
-	if (chatColor == nul) then
-		chatColor = "160";
-	end
-	if (varName ~= nul) then
-		if (varName == 1) then
-			varName = 0;
-			if (displayNew == "y") then
-				add_to_chat(chatColor,varName..": OFF");
-			end
+function pairsByKeys (t, f)
+	local a = {}
+	for n in pairs(t) do table.insert(a, n) end
+		table.sort(a, f)
+		local i = 0      -- iterator variable
+		local iter = function ()   -- iterator function
+		i = i + 1
+		if a[i] == nil then 
+			return nil
 		else
-			varName = 1;
-			if (displayNew == "y") then
-				add_to_chat(chatColor,varName..": ON");
-			end
-		end
-	else
-		add_to_chat(160,"Missing variable to toggle.");
+			return a[i], t[a[i]]
+        end
 	end
-	return varName
+	return iter
 end
 
 function event_ipc_message(msg)
---add_to_chat(160,"..."..msg.."...");
-	if (chatPorterValues.UseChatPorter.Value == true) then
+	if (chatPorterValues.UseChatPorter.value == true) then
 		if (string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")) then
---			add_to_chat(160,"does this hit?");
 			a,b,chatMode,senderLSname,senderName,message = string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")
---[[
-			add_to_chat(41,"chatMode: "..chatMode);
-			add_to_chat(41,"senderLSname: "..senderLSname);
-			add_to_chat(41,"senderName: "..senderName);
-			add_to_chat(41,"message: "..message);
-]]--
-			if (chatMode == "t") and (chatPorterValues.DisplayTellChat.Value == true) then
---				add_to_chat(14,"tell ... playerName: "..playerName);
+			if (chatMode == "t") and (chatPorterValues.DisplayTellChat.value == true) then
 				if (playerName ~= senderName) then
 					add_to_chat(Tcolor,"[t] "..senderName..">>"..senderLSname.." "..message);
-				else	
-					-- this should never fire, only here for testing
-					if table.contains(myChars, senderName) then
-						add_to_chat(Tcolor,"(telltesting)[t] "..senderName..">>"..senderLSname.." "..message);
-					end
 				end
-		
-			elseif (chatMode == "p") and (chatPorterValues.DisplayPartyChat.Value == true) then
---				add_to_chat(160,"party...");
+			elseif (chatMode == "p") and (chatPorterValues.DisplayPartyChat.value == true) then
 				if (T(get_party()):with('name', senderName) == nil) then
 					add_to_chat(Pcolor,"[p] ".."("..senderName..") "..message);
---				else
-					-- this should never fire, only here for testing
---					add_to_chat(Pcolor,"(partytest)[p] ".."("..senderName..") "..message);
 				end
-		
-			elseif (chatMode == "l") and (chatPorterValues.DisplayLinkshellChat.Value == true) then
---				add_to_chat(160,"linkshell...");
+			elseif (chatMode == "l") and (chatPorterValues.DisplayLinkshellChat.value == true) then
 				if (senderLSname ~= LSname) then
 					add_to_chat(LScolor,"["..senderLSname.."] <"..senderName.."> "..message);
---				else
-					-- this should fire if both chars have same LS, only here for testing
---					add_to_chat(LScolor,"(linkshelltest)["..senderLSname.."] <"..senderName.."> "..message);
---					add_to_chat(160,"senderLSname: "..senderLSname..", LSname: "..LSname);
 				end
 			elseif (chatMode == "l2") then
 				send_command("input /l "..message);
@@ -320,36 +241,24 @@ end
 function event_incoming_text(original, modified, mode)
 	if (playerName == nil) then
 		playerName = get_player().name;
-		add_to_chat(160,"playerName is nil");
 	end
 	if (LSname == nil) then
 		LSname = get_player().linkshell;
-		add_to_chat(160,"LSname is nil");
 	end
 
 	if (mode == 6) then -- linkshell (me)
---		add_to_chat(14,"(event_incoming_text)this is mode: "..mode);
---		add_to_chat(160,original);
 		if (string.find(original, "<(%a+)> (.+)")) then
 			a,b,player,message = string.find(original, "<(%a+)> (.+)")
 			send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message);
---			add_to_chat(160,specialChar.."l:"..LSname..specialChar..player..specialChar..message);
 		end
-	--end
 	
 	elseif (mode == 5) then -- party (me)
---		add_to_chat(14,"(event_incoming_text)this is mode: "..mode);
---		add_to_chat(160,original);
 		if (string.find(original, "%((%a+)%) (.+)")) then
 			a,b,player,message = string.find(original, "%((%a+)%) (.+)")
 			send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message);
---			add_to_chat(160,specialChar.."p:"..""..specialChar..player..specialChar..message);
 		end
-	--end
 
 	elseif (mode == 4) then -- tell (out)
---		add_to_chat(14,"(event_incoming_text)this is mode: "..mode);
---		add_to_chat(160,"mode:4..."..original.."...");
 		if (string.find(original, ">>(%a+) : (.+)")) then
 			a,b,player,message = string.find(original, ">>(%a+) : (.+)")
 			send_ipc_message(specialChar.."t:"..player..specialChar..playerName..specialChar..message);
@@ -367,7 +276,6 @@ function event_incoming_text(original, modified, mode)
 end
 
 function event_chat_message(is_gm, mode, player, message)
---	add_to_chat(14,"(event_chat_message)this is mode: "..mode);
 --[[
 3 = tell
 4 = party
@@ -378,15 +286,10 @@ function event_chat_message(is_gm, mode, player, message)
 
 	if (mode == 3) then -- tell
 		send_ipc_message(specialChar.."t:"..playerName..specialChar..player..specialChar..message);
---		add_to_chat(160,specialChar.."t:"..playerName..specialChar..player..specialChar..message);
-			lastTellFrom = player;
---			add_to_chat(160,"lastTellFrom: "..lastTellFrom);
 	elseif (mode == 5) then -- linkshell
 		send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message);
---		add_to_chat(160,specialChar.."l:"..LSname..specialChar..player..specialChar..message);
 	elseif (mode == 4) then -- party
 		send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message);
---		add_to_chat(160,specialChar.."p:"..""..specialChar..player..specialChar..message);
 	end
 end
 
