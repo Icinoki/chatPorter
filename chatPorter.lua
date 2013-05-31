@@ -28,42 +28,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 _addon = {}
 _addon.name = 'ChatPorter'
-_addon.version = '1.12'
+_addon.version = '1.21'
 _addon.author = 'Ragnarok.Ikonic'
 
 require 'tablehelper'
 require 'stringhelper'
 require 'colors'
+local config = require 'config'
+require 'logger'
 
-LSname = get_player().linkshell;
-playerName = get_player().name;
-specialChar = "|";
-lastTellFrom = "";
+local defaults = T{}
+defaults.usechatporter = true
+defaults.displaylinkshellchat = true
+defaults.displaypartychat = true
+defaults.displaytellchat = true
+defaults.lscolor = 41 -- 41, 70, 158, 204
+defaults.pcolor = 207 -- 207
+defaults.tcolor = 200 -- 208
 
-LScolor = 41; -- 41, 70, 158, 204
-Pcolor = 207; -- 207
-Tcolor = 200; -- 208
+settings = T{}
 
-UseChatPorter = 1;
-DisplayPartyChat = 1;
-DisplayLinkshellChat = 1;
-DisplayTellChat = 1;
-
-chatPorterValues = T{};
-chatPorterValues.UseChatPorter = T{};
-chatPorterValues.UseChatPorter.name = "UseChatPorter";
-chatPorterValues.UseChatPorter.value = true;
-chatPorterValues.DisplayPartyChat = T{};
-chatPorterValues.DisplayPartyChat.name = "DisplayPartyChat";
-chatPorterValues.DisplayPartyChat.value = true;
-chatPorterValues.DisplayLinkshellChat = T{};
-chatPorterValues.DisplayLinkshellChat.name = "DisplayLinkshellChat";
-chatPorterValues.DisplayLinkshellChat.value = true;
-chatPorterValues.DisplayTellChat = T{};
-chatPorterValues.DisplayTellChat.name = "DisplayTellChat";
-chatPorterValues.DisplayTellChat.value = true;
+LSname = get_player().linkshell
+playerName = get_player().name
+specialChar = "|"
+lastTellFrom = ""
 
 function event_load()
+	settings = config.load(defaults)
 	send_command('alias ChatPorter lua command ChatPorter')
 	send_command('alias cp lua command ChatPorter')
 	send_command('alias l2 lua command ChatPorter l')
@@ -81,6 +72,9 @@ function event_load()
 end
 
 function event_unload()
+	settings:save('all') -- all characters
+--	settings:save() -- current character only
+
 	send_command('unalias ChatPorter')
 	send_command('unalias cp')
 	send_command('unalias l2')
@@ -105,57 +99,100 @@ end
 
 function event_addon_command(...)
     local args = {...}
-    if args[2] ~= nil then
+    if (args[2] ~= nil) then
         comm = args[1]
-		com2 = table.remove(args,1)
-		com2 = table.concat(args, ' ')
-		if comm:lower() == 'l' then
-			send_ipc_message(specialChar.."l2:"..LSname..specialChar..playerName..specialChar..com2);
-		elseif comm:lower() == 'p' then
-			send_ipc_message(specialChar.."p2:"..""..specialChar..playerName..specialChar..com2);
-		elseif comm:lower() == 't' then
-			send_ipc_message(specialChar.."t2:"..playerName..specialChar..playerName..specialChar..com2);
-		elseif comm:lower() == 'r' then
-			send_ipc_message(specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
-		elseif string.first(comm:lower(), 1) == 'f' then
-			send_ipc_message(specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
+		if comm ~= "color" then
+			com2 = table.remove(args,1)
+			com2 = table.concat(args, ' ')
+			if comm:lower() == 'l' then
+				send_ipc_message(specialChar.."l2:"..LSname..specialChar..playerName..specialChar..com2);
+			elseif comm:lower() == 'p' then
+				send_ipc_message(specialChar.."p2:"..""..specialChar..playerName..specialChar..com2);
+			elseif comm:lower() == 't' then
+				send_ipc_message(specialChar.."t2:"..playerName..specialChar..playerName..specialChar..com2);
+			elseif comm:lower() == 'r' then
+				send_ipc_message(specialChar.."r2:"..playerName..specialChar..playerName..specialChar..com2);
+			elseif string.first(comm:lower(), 1) == 'f' then
+				send_ipc_message(specialChar.."f:"..string.at(comm,2)..specialChar..playerName..specialChar..com2);
+			end
+		else
+			com2 = args[2]
+			com3 = tonumber(args[3])
+			if com2 == 'l' then
+				if (com3 ~= nil) and (com3 >= 1 and com3 <= 255) then
+					settings.lscolor = com3
+				else
+					add_to_chat(160,"Color must be within range of 1 - 255; setting default color.")
+					settings.lscolor = defaults.lscolor
+				end
+				showStatus('lscolor')
+			elseif com2 == 'p' then
+				if (com3 ~= nil) and (com3 >= 1 and com3 <= 255) then
+					settings.pcolor = com3
+				else
+					add_to_chat(160,"Color must be within range of 1 - 255; setting default color.")
+					settings.pcolor = defaults.pcolor
+				end
+				showStatus('pcolor')
+			elseif com2 == 't' then
+				if (com3 ~= nil) and (com3 >= 1 and com3 <= 255) then
+					settings.tcolor = com3
+				else
+					add_to_chat(160,"Color must be within range of 1 - 255; setting default color.")
+					settings.tcolor = defaults.tcolor
+				end
+				showStatus('tcolor')
+			end
+			
 		end
     elseif args[1] ~= nil then
         comm = args[1]
         if comm:lower() == 'help' then
             add_to_chat(55,_addon.name.." v".._addon.version..' possible commands:')
 			add_to_chat(55,'     //ChatPorter and //cp are both valid commands.')
-            add_to_chat(55,'     //ChatPorter help   : Lists this menu.')
-			add_to_chat(55,'     //ChatPorter status : Shows current configuration.')
-            add_to_chat(55,'     //ChatPorter toggle : Toggles ChatPorter on/off.')
-            add_to_chat(55,'     //ChatPorter p      : Toggles using ChatPorter for party chat.')
-            add_to_chat(55,'     //ChatPorter l      : Toggles using ChatPorter for linkshell chat.')
-            add_to_chat(55,'     //ChatPorter t      : Toggles using ChatPorter for tell chat.')
-			add_to_chat(55,'     //l2 message        : Sends message from second character to linkshell.')
-			add_to_chat(55,'     //p2 message        : Sends message from second character to party.')
-			add_to_chat(55,'     //t2 name message   : Sends message from second character to name in tell.')
-			add_to_chat(55,'     //r2 message        : Sends reply message from second character.')
-			add_to_chat(55,'     //f# message        : Sends message from second character to FFOChat channel #.  Works for 1-5.')
-			add_to_chat(55,'     //cp f# message     : Same as f#, but for any #.')
+            add_to_chat(55,'     //cp help         : Lists this menu.')
+			add_to_chat(55,'     //cp status       : Shows current configuration.')
+			add_to_chat(55,'     //cp colors       : Shows possible color codes.')
+            add_to_chat(55,'     //cp toggle       : Toggles ChatPorter on/off.')
+            add_to_chat(55,'     //cp l            : Toggles using ChatPorter for linkshell chat.')
+			add_to_chat(55,'     //cp color l #    : Sets color for linkshell chat from second character.')
+            add_to_chat(55,'     //cp p            : Toggles using ChatPorter for party chat.')
+			add_to_chat(55,'     //cp color p #    : Sets color for party chat from second character.')
+            add_to_chat(55,'     //cp t            : Toggles using ChatPorter for tell chat.')
+			add_to_chat(55,'     //cp color t #    : Sets color for tell chat from second character.')
+			add_to_chat(55,'     //l2 message      : Sends message from second character to linkshell.')
+			add_to_chat(55,'     //p2 message      : Sends message from second character to party.')
+			add_to_chat(55,'     //t2 name message : Sends message from second character to name in tell.')
+			add_to_chat(55,'     //r2 message      : Sends reply message from second character.')
+			add_to_chat(55,'     //f# message      : Sends message from second character to FFOChat channel #.  Works for 1-5.')
+			add_to_chat(55,'     //cp f# message   : Same as f#, but for any #.')
 		elseif comm:lower() == 'status' then
-            showStatus();
+            showStatus()
         elseif comm:lower() == 'toggle' then
-			chatPorterValues.UseChatPorter.value = not chatPorterValues.UseChatPorter.value;
-			showStatus(chatPorterValues.UseChatPorter);
-        elseif comm:lower() == 'p' then
-			chatPorterValues.DisplayPartyChat.value = not chatPorterValues.DisplayPartyChat.value;
-			showStatus(chatPorterValues.DisplayPartyChat);
+			settings.usechatporter = not settings.usechatporter
+			showStatus('usechatporter')
         elseif comm:lower() == 'l' then
-			chatPorterValues.DisplayLinkshellChat.value = not chatPorterValues.DisplayLinkshellChat.value;
-			showStatus(chatPorterValues.DisplayLinkshellChat);
+			settings.displaylinkshellchat = not settings.displaylinkshellchat
+			showStatus('displaylinkshellchat')
+        elseif comm:lower() == 'p' then
+			settings.displaypartychat = not settings.displaypartychat
+			showStatus('displaypartychat')
         elseif comm:lower() == 't' then
-			chatPorterValues.DisplayTellChat.value = not chatPorterValues.DisplayTellChat.value;
-			showStatus(chatPorterValues.DisplayTellChat);
+			settings.displaytellchat = not settings.displaytellchat
+			showStatus('displaytellchat')
 		elseif comm:lower() == 'reset' then
-			add_to_chat(160, _addon.name.." v".._addon.version.." resetting stats.");
-            reset();
+			add_to_chat(160, _addon.name.." v".._addon.version.." resetting stats.")
+            reset()
         elseif comm:lower() == 'exit' then
 			send_command('lua u ChatPorter')
+        elseif comm:lower() == 'vprint' then
+			settings:vprint()
+        elseif comm:lower() == 'print' then
+			for key, value in pairs(settings) do 
+				log(key, value)
+			end
+		elseif comm:lower() == 'colors' then
+			showColors()
         else
             return
         end
@@ -170,11 +207,29 @@ end
 
 function showStatus(var)
 	if (var ~= nul) then
-		add_to_chat(160,var.name..": "..onOffPrint(var.value));
-	else
-		for i,v in pairsByKeys(chatPorterValues) do
-			add_to_chat(160,chatPorterValues[i].name..": "..string.color(onOffPrint(chatPorterValues[i].value), 55, 160));
+		if var == "usechatporter" then
+			add_to_chat(160,"   UseChatPorter: " .. string.color(onOffPrint(settings.usechatporter),204,160))
+		elseif var == "displaylinkshellchat" then
+			add_to_chat(160,"   DisplayLinkshellChat: " .. string.color(onOffPrint(settings.displaylinkshellchat),204,160))
+		elseif var == "displaypartychat" then
+			add_to_chat(160,"   DisplayPartyChat: " .. string.color(onOffPrint(settings.displaypartychat),204,160))
+		elseif var == "displaytellchat" then
+			add_to_chat(160,"   DisplayTellChat: " .. string.color(onOffPrint(settings.displaytellchat),204,160))
+		elseif var == "lscolor" then
+			add_to_chat(160,"   LinkshellColor: " .. string.color(tostring(settings.lscolor),204,160))
+		elseif var == "pcolor" then
+			add_to_chat(160,"   PartyColor: " .. string.color(tostring(settings.pcolor),204,160))
+		elseif var == "tcolor" then
+			add_to_chat(160,"   TellColor: " .. string.color(tostring(settings.tcolor),204,160))
 		end
+	else
+		add_to_chat(160,"   UseChatPorter: " .. string.color(onOffPrint(settings.usechatporter),204,160))
+		add_to_chat(160,"   DisplayLinkshellChat: " .. string.color(onOffPrint(settings.displaylinkshellchat),204,160))
+		add_to_chat(160,"   DisplayPartyChat: " .. string.color(onOffPrint(settings.displaypartychat),204,160))
+		add_to_chat(160,"   DisplayTellChat: " .. string.color(onOffPrint(settings.displaytellchat),204,160))
+		add_to_chat(160,"   LinkshellColor: " .. string.color(tostring(settings.lscolor),204,160))
+		add_to_chat(160,"   PartyColor: " .. string.color(tostring(settings.pcolor),204,160))
+		add_to_chat(160,"   TellColor: " .. string.color(tostring(settings.tcolor),204,160))
 	end
 end
 
@@ -191,48 +246,72 @@ function onOffPrint(bleh)
 	return bleh;
 end
 
-function pairsByKeys (t, f)
-	local a = {}
-	for n in pairs(t) do table.insert(a, n) end
-		table.sort(a, f)
-		local i = 0      -- iterator variable
-		local iter = function ()   -- iterator function
-		i = i + 1
-		if a[i] == nil then 
-			return nil
+function showColors()
+    colors = {}
+    colors[1] = 'Menu > Font Colors > Chat > Immediate vicinity ("Say")'
+    colors[2] = 'Menu > Font Colors > Chat > Wide area ("Shout")'
+    colors[4] = 'Menu > Font Colors > Chat > Tell target only ("Tell")'
+    colors[5] = 'Menu > Font Colors > Chat > All party members ("Party")'
+    colors[6] = 'Menu > Font Colors > Chat > Linkshell group ("Linkshell")'
+    colors[7] = 'Menu > Font Colors > Chat > Emotes'
+    colors[17] = 'Menu > Font Colors > Chat > Messages ("Message")'
+    colors[142] = 'Menu > Font Colors > Chat > NPC Conversations'
+    colors[20] = 'Menu > Font Colors > For Others > HP/MP others loose'
+    colors[21] = 'Menu > Font Colors > For Others > Actions others evade'
+    colors[22] = 'Menu > Font Colors > For Others > HP/MP others recover'
+    colors[60] = 'Menu > Font Colors > For Others > Beneficial effects others are granted'
+    colors[61] = 'Menu > Font Colors > For Others > Detrimental effects others receive'
+    colors[63] = 'Menu > Font Colors > For Others > Effects others resist'
+    colors[28] = 'Menu > Font Colors > For Self > HP/MP you loose'
+    colors[29] = 'Menu > Font Colors > For Self > Actions you evade'
+    colors[30] = 'Menu > Font Colors > For Self > HP/MP you recover'
+    colors[56] = 'Menu > Font Colors > For Self > Beneficial effects you are granted'
+    colors[57] = 'Menu > Font Colors > For Self > Detrimental effects you receive'
+    colors[59] = 'Menu > Font Colors > For Self > Effects you resist'
+    colors[8] = 'Menu > Font Colors > System > Calls for help'
+    colors[50] = 'Menu > Font Colors > System > Standard battle messages'
+    colors[121] = 'Menu > Font Colors > System > Basic system messages'
+
+	makeArray = T{}
+	for v = 3, 255, 1 do
+		if colors[v] ~= nil then
+            add_to_chat(v, string.rep(0,3-#tostring(v))..v.." - "..colors[v])
 		else
-			return a[i], t[a[i]]
-        end
+			if v ~= 253 then
+				makeArray[#makeArray+1] = "\x1F"..string.char(v)..string.rep(0,3-#tostring(v))..v.."\x1F"..string.char(160)
+			end
+		end
 	end
-	return iter
+	add_to_chat(160,table.sconcat(makeArray))
+	--makeArray:vprint()
 end
 
 function event_ipc_message(msg)
-	if (chatPorterValues.UseChatPorter.value == true) then
+	if (settings.usechatporter == true) then
 		if (string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")) then
 			a,b,chatMode,senderLSname,senderName,message = string.find(msg, "|(%w+):(%w*)|(%a+)|(.+)")
-			if (chatMode == "t") and (chatPorterValues.DisplayTellChat.value == true) then
+			if (chatMode == "t") and (settings.displaytellchat == true) then
 				if (playerName ~= senderName) then
-					add_to_chat(Tcolor,"[t] "..senderName..">>"..senderLSname.." "..message);
+					add_to_chat(settings.tcolor,"[t] "..senderName..">>"..senderLSname.." "..message)
 				end
-			elseif (chatMode == "p") and (chatPorterValues.DisplayPartyChat.value == true) then
+			elseif (chatMode == "p") and (settings.displaypartychat == true) then
 				if (T(get_party()):with('name', senderName) == nil) then
-					add_to_chat(Pcolor,"[p] ".."("..senderName..") "..message);
+					add_to_chat(settings.pcolor,"[p] ".."("..senderName..") "..message)
 				end
-			elseif (chatMode == "l") and (chatPorterValues.DisplayLinkshellChat.value == true) then
+			elseif (chatMode == "l") and (settings.displaylinkshellchat == true) then
 				if (senderLSname ~= LSname) then
-					add_to_chat(LScolor,"["..senderLSname.."] <"..senderName.."> "..message);
+					add_to_chat(settings.lscolor,"["..senderLSname.."] <"..senderName.."> "..message)
 				end
 			elseif (chatMode == "l2") then
-				send_command("input /l "..message);
+				send_command("input /l "..message)
 			elseif (chatMode == "p2") then
-				send_command("input /p "..message);
+				send_command("input /p "..message)
 			elseif (chatMode == "t2") then
-				send_command("input /t "..message);
+				send_command("input /t "..message)
 			elseif (chatMode == "r2") then
-				send_command("input /t "..lastTellFrom.." "..message);
+				send_command("input /t "..lastTellFrom.." "..message)
 			elseif (chatMode == "f") then
-				send_command("input /"..senderLSname.." "..message);
+				send_command("input /"..senderLSname.." "..message)
 			end
 		end
 	end
@@ -240,28 +319,28 @@ end
 
 function event_incoming_text(original, modified, mode)
 	if (playerName == nil) then
-		playerName = get_player().name;
+		playerName = get_player().name
 	end
 	if (LSname == nil) then
-		LSname = get_player().linkshell;
+		LSname = get_player().linkshell
 	end
 
 	if (mode == 6) then -- linkshell (me)
 		if (string.find(original, "<(%a+)> (.+)")) then
 			a,b,player,message = string.find(original, "<(%a+)> (.+)")
-			send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message);
+			send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message)
 		end
 	
 	elseif (mode == 5) then -- party (me)
 		if (string.find(original, "%((%a+)%) (.+)")) then
 			a,b,player,message = string.find(original, "%((%a+)%) (.+)")
-			send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message);
+			send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message)
 		end
 
 	elseif (mode == 4) then -- tell (out)
 		if (string.find(original, ">>(%a+) : (.+)")) then
 			a,b,player,message = string.find(original, ">>(%a+) : (.+)")
-			send_ipc_message(specialChar.."t:"..player..specialChar..playerName..specialChar..message);
+			send_ipc_message(specialChar.."t:"..player..specialChar..playerName..specialChar..message)
 		end
 	end
 	
@@ -285,19 +364,20 @@ function event_chat_message(is_gm, mode, player, message)
 ]]--
 
 	if (mode == 3) then -- tell
-		send_ipc_message(specialChar.."t:"..playerName..specialChar..player..specialChar..message);
+		send_ipc_message(specialChar.."t:"..playerName..specialChar..player..specialChar..message)
+		lastTellFrom = player;
 	elseif (mode == 5) then -- linkshell
-		send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message);
+		send_ipc_message(specialChar.."l:"..LSname..specialChar..player..specialChar..message)
 	elseif (mode == 4) then -- party
-		send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message);
+		send_ipc_message(specialChar.."p:"..""..specialChar..player..specialChar..message)
 	end
 end
 
 --[[
-
 possible port to ffochat LSchannel
-save and read settings to settings.xml
-ability to change color settings
+
+add stuff to save based on character
+add stuff to use settings based on character
 
 ]]--
 
