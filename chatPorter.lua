@@ -496,8 +496,8 @@ windower.register_event('ipc message',function (msg)
 				end
 			elseif (chatMode == "p") and (settings.party.displaychat == true) then
 				if (T(windower.ffxi.get_party()):with('name', senderName) == nil) then
-					windower.add_to_chat(settings.party.color,"[p] ".."("..senderName..") "..message)
-					showparty[#showparty +1] = " [p] ("..senderName..") "..message:strip_format().." "
+					windower.add_to_chat(settings.party.color," ("..senderName..") "..message)
+					showparty[#showparty +1] = " ("..senderName..") "..message:strip_format():trim().." "
 					show("party")
 				end
 			elseif (chatMode == "l2") then
