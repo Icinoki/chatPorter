@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 _addon.name = 'ChatPorter'
-_addon.version = '1.37'
+_addon.version = '1.38'
 _addon.author = 'Ikonic'
 _addon.commands = {'ChatPorter','cp'}
 
@@ -538,15 +538,16 @@ windower.register_event('incoming text',function (original, modified, mode)
 			show("party")
 		end
 	elseif (mode == 4) or (mode == 12) then -- tell
-		if (string.find(original, ">>(%a+) : (.+)")) then
+		if (string.find(original, ">>(%a+) : (.+)")) then -- incoming
 			a,b,player,message = string.find(original, ">>(%a+) : (.+)")
+			lastTellFrom = player;
 			windower.send_ipc_message(specialChar.."t:"..player..specialChar..playerName..specialChar..message)
-			showtell[#showtell +1] = ">>"..player.." : "..message:strip_format():trim().." "
+			showtell[#showtell +1] = " >>"..player.." : "..message:strip_format():trim().." "
 			show("tell")
-		elseif (string.find(original, "(%a+)>> (.+)")) then
+		elseif (string.find(original, "(%a+)>> (.+)")) then -- outgoing
 			a,b,player,message = string.find(original, "(%a+)>> (.+)")
 			windower.send_ipc_message(specialChar.."t:"..playerName..specialChar..player..specialChar..message)
-			showtell[#showtell +1] = playerName..">> "..message:strip_format():trim().." "
+			showtell[#showtell +1] = " "..player..">> "..message:strip_format():trim().." "
 			show("tell")
 		end
 	end
